@@ -34,6 +34,8 @@ AUI().ready('aui-sortable',function(A) {
 
         // Create a new list item and append it to our log of events.
         log1.append(A.Node.create('<li />').set('text', msg));
+        
+        // We have not overridden the behaviour of sortable.getOrdering()...
         log2.append(A.Node.create('<li />').set('text', sortable.getOrdering()));
 	});
 });
