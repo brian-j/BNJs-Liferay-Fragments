@@ -1,0 +1,172 @@
+<%@include file="/init.jsp"%>
+<%
+	String ENTRY_TYPES = "Active";
+
+	String theqCWFIPhoneBookGroup = (String) portletSession
+			.getAttribute("qCWFIPhoneBookGroup",
+					portletSession.APPLICATION_SCOPE);
+	String theqCWFIPhoneBookSubGroup = (String) portletSession
+			.getAttribute("qCWFIPhoneBookSubGroup",
+					portletSession.APPLICATION_SCOPE);
+
+	PortletURL iteratorURLpba = renderResponse.createRenderURL();
+	iteratorURLpba.setParameter("tabs1", "pbgroupsort");
+
+	PortletURL readURL = renderResponse.createRenderURL();
+	readURL.setParameter("jspPage",
+			"/html/phonebookportlet/read_record.jsp");
+	readURL.setParameter("tabs1", "pbgroupsort");
+	if (LiferayWindowState.EXCLUSIVE.toString().contentEquals(
+			readURL.getWindowState().toString())) {
+		readURL.setWindowState(LiferayWindowState.NORMAL);
+		iteratorURLpba.setWindowState(LiferayWindowState.NORMAL);
+	}
+%>
+<portlet:actionURL name="sortPhoneBook" var="sortPhoneBookURL">
+	<portlet:param name="tabs1" value="pbgroupsort" />
+</portlet:actionURL>
+
+<portlet:actionURL name="clrSortPhoneBook" var="clrSortPhoneBookURL">
+	<portlet:param name="tabs1" value="pbgroupsort" />
+</portlet:actionURL>
+
+<liferay-ui:panel-container extended="<%=true%>"
+	id="phoneBookSrchPanelContainer" persistState="<%=true%>">
+	<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
+		id="phoneBookSrchPanel" persistState="<%=true%>" title="Search...">
+
+		<aui:form name="CWFIPhoneBookSrchForm" id="CWFIPhoneBookSrchForm"
+			action="<%=sortPhoneBookURL.toString()%>" method="post">
+			<aui:fieldset>
+				<aui:layout>
+
+					<aui:column>
+						<aui:input name="qCWFIPhoneBookGroup" size="50"
+							value="<%=theqCWFIPhoneBookGroup%>"
+							helpMessage="Type (<em>part of</em>) the phoneBook group to search for." />
+					</aui:column>
+
+					<aui:column>
+						<aui:input name="qCWFIPhoneBookSubGroup" size="50"
+							value="<%=theqCWFIPhoneBookSubGroup%>"
+							helpMessage="Type (<em>part of</em>) the phoneBook subgroup to search for." />
+					</aui:column>
+
+					<aui:button-row>
+						<aui:button type="submit" value="Search" />
+						<aui:button type="cancel" value="Clear"
+							onClick="<%=clrSortPhoneBookURL%>" />
+					</aui:button-row>
+
+				</aui:layout>
+			</aui:fieldset>
+
+		</aui:form>
+	</liferay-ui:panel>
+</liferay-ui:panel-container>
+<br />
+
+
+<aui:form name="CWFIPhoneBookSortForm" id="CWFIPhoneBookSortForm"
+	action="<%=sortPhoneBookURL.toString()%>" method="post">
+	<aui:layout>
+		<aui:column columnWidth="70">
+			<liferay-ui:panel-container extended="<%=true%>"
+				id="phoneBookSortDataPanelContainer" persistState="<%=true%>">
+				<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
+					id="phoneBookSortDataPanel" persistState="<%=true%>"
+					title="Phonebook Items...">
+
+					<liferay-ui:search-container
+						emptyResultsMessage="there-are-no-phoneBooks" delta="10"
+						iteratorURL="<%=iteratorURLpba%>" orderByCol="phoneBook"
+						orderByType="ASC">
+
+						<liferay-ui:search-container-results>
+							<%
+								List<CWFIPhoneBook> tempResults = CWFIPhoneBookActions
+																	.getPhoneBooks(renderRequest,
+																			ENTRY_TYPES);
+
+															results = ListUtil.subList(tempResults,
+																	searchContainer.getStart(),
+																	searchContainer.getEnd());
+															total = tempResults.size();
+
+															pageContext.setAttribute("results",
+																	results);
+															pageContext
+																	.setAttribute("total", total);
+							%>
+						</liferay-ui:search-container-results>
+
+						<liferay-ui:search-container-row
+							className="com.cwfi.lines.model.CWFIPhoneBook" rowVar="thisrow"
+							keyProperty="entryId" modelVar="thisPhoneBook">
+
+							<liferay-ui:search-container-column-text
+								value="<span class='aui-icon aui-icon-arrow-4 drag-handle'></span>" />
+
+							<liferay-ui:search-container-column-text name="entryGroup"
+								value="<%=thisPhoneBook.getEntryGroup()%>" />
+
+							<liferay-ui:search-container-column-text name="entrySubGroup"
+								value="<%=thisPhoneBook
+												.getEntrySubGroup()%>" />
+
+							<liferay-ui:search-container-column-text name="entryText"
+								value='<%=thisPhoneBook.getEntryText()
+												+ "..."
+												+ thisPhoneBook
+														.getEntryFaxPhone()
+												+ "..."
+												+ thisPhoneBook
+														.getEntryNumber()%>' />
+
+							<liferay-ui:search-container-column-text name="entryOrder"
+								cssClass="sortPK"
+								value="<%=String.valueOf(thisPhoneBook
+												.getPrimaryKey())%>" />
+
+							<liferay-ui:search-container-row-parameter name="id"
+								value="<%=String.valueOf(thisPhoneBook
+												.getPrimaryKey())%>" />
+
+						</liferay-ui:search-container-row>
+
+						<liferay-ui:search-iterator />
+
+					</liferay-ui:search-container>
+				</liferay-ui:panel>
+			</liferay-ui:panel-container>
+		</aui:column>
+		<aui:column columnWidth="30">
+			<liferay-ui:panel-container extended="<%=true%>"
+				id="phoneBookSortPanelContainer" persistState="<%=true%>">
+				<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
+					id="phoneBookSortPanel" persistState="<%=true%>"
+					title="Phonebook Listing Reorder Summary...">
+					<div>
+						<ol id="sortLog">
+						</ol>
+					</div>
+				</liferay-ui:panel>
+			</liferay-ui:panel-container>
+
+			<liferay-ui:panel-container extended="<%=true%>"
+				id="phoneBookSortOrderingPanelContainer" persistState="<%=true%>">
+				<liferay-ui:panel collapsible="<%=true%>" extended="<%=true%>"
+					id="phoneBookSortOrderingPanel" persistState="<%=true%>"
+					title="Phonebook Sort Ordering Summary...">
+					<div>
+						<ol id="sortOrderLog">
+						</ol>
+					</div>
+					<div id="sortButton"></div>
+				</liferay-ui:panel>
+			</liferay-ui:panel-container>
+
+		</aui:column>
+	</aui:layout>
+</aui:form>
+<%@ include file="/html/phonebookportlet/aui_sort_scripts.jspf"%> 

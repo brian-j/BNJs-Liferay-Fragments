@@ -1,0 +1,40 @@
+<script type="text/javascript">
+AUI().ready('aui-sortable',function(A) {
+	
+	var log1, log2, sortable;
+
+    // The node where we'll output the drag-and-drop events.
+    log1 = A.one('#sortLog');
+    log2 = A.one('#sortOrderLog');
+	
+	sortable = new A.Sortable({
+		nodes: '.results-row',
+		opacity  : '0.5',
+		constrain: {
+			stickY: true
+		},
+		handles: ['.results-row .drag-handle']
+	});
+	
+	sortable.delegate.after('drag:end', function (e) {
+		
+        var node = sortable.delegate.get('currentNode'),
+            prev = node.previous(),
+            next = node.next(),
+            msg  = 'Moved ' + node.get('text');
+
+        // Customize the log message based on where the `node` moved to.
+        if (prev && next) {
+            msg += ' between ' + prev.get('text') + ' and ' + next.get('text');
+        } else if (prev) {
+            msg += ' to the end, after ' + prev.get('text');
+        } else if (next) {
+            msg += ' to the beginning, before ' + next.get('text');
+        }
+
+        // Create a new list item and append it to our log of events.
+        log1.append(A.Node.create('<li />').set('text', msg));
+        log2.append(A.Node.create('<li />').set('text', sortable.getOrdering()));
+	});
+});
+</script> 
